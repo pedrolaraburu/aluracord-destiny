@@ -1,34 +1,9 @@
-import { Box, Button, Text, TextField, Image } from '@skynexui/components';
+import { Box, Button, Text, TextField, Image, Icon} from '@skynexui/components';
+import React from 'react';
+import { SiGithub } from 'react-icons/si';
+import {useRouter} from 'next/router';
 import appConfig from "../config.json";
 
-function GlobalStyle() {
-    return (
-      <style global jsx>{`
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-          list-style: none;
-        }
-        body {
-          font-family: 'Open Sans', sans-serif;
-        }
-        /* App fit Height */ 
-        html, body, #__next {
-          min-height: 100vh;
-          display: flex;
-          flex: 1;
-        }
-        #__next {
-          flex: 1;
-        }
-        #__next > * {
-          flex: 1;
-        }
-        /* ./App fit Height */ 
-      `}</style>
-    );
-}
 function Titulo(props) {
     const Tag = props.tag || 'h1';
     return  (
@@ -60,11 +35,12 @@ function Titulo(props) {
 //   export default HomePage
 
 export default function PaginaInicial() {
-    const username = 'pedrolaraburu';
-  
+    // const username = 'pedrolaraburu';
+    const [username, setUsername] = React.useState('pedrolaraburu');
+    const [location, setLocation] = React.useState('Brasília, DF');
+    const roteamento = useRouter();
     return (
       <>
-        <GlobalStyle />
         <Box
           styleSheet={{
             display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -91,17 +67,30 @@ export default function PaginaInicial() {
             {/* Formulário */}
             <Box
               as="form"
+              onSubmit={function (infosDoEvento){
+                infosDoEvento.preventDefault();
+                console.log("Alguém submeteu o form");
+                roteamento.push('/chat'); //Quando clicar no botão de entrar vai mudar a página para a página de chat
+              }}
               styleSheet={{
                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                 width: { xs: '100%', sm: '50%' }, textAlign: 'center', marginBottom: '32px',
               }}
             >
-              <Titulo tag="h2">Bem-vindo ao servidor!</Titulo>
+              <Titulo tag="h2">Bem-vindo(a) ao servidor, {username}!</Titulo>
               <Text variant="body3" styleSheet={{ marginBottom: '32px', color: appConfig.theme.colors.neutrals[300] }}>
                 {appConfig.name}
               </Text>
-  
+              
               <TextField
+                placeholder="Digite seu usuário do GitHub"
+                value = {username}
+                onChange={event =>{
+                  setUsername(event.target.value);
+                  fetch(`https://api.github.com/users/${username}`)
+                    .then(response => response.json())
+                    .then(data => {setLocation(data.location)})
+                }}
                 fullWidth
                 textFieldColors={{
                   neutral: {
@@ -148,7 +137,7 @@ export default function PaginaInicial() {
                   borderRadius: '50%',
                   marginBottom: '16px',
                 }}
-                src={`https://github.com/${username}.png`}
+                src={username.length > 2 ?`https://github.com/${username}.png` : "https://github.com/error.png"}
               />
               <Text
                 variant="body4"
@@ -156,10 +145,23 @@ export default function PaginaInicial() {
                   color: appConfig.theme.colors.neutrals[200],
                   backgroundColor: appConfig.theme.colors.neutrals[900],
                   padding: '3px 10px',
-                  borderRadius: '1000px'
+                  borderRadius: '1000px', 
+                  margin: '5px 0'
                 }}
               >
-                {username}
+                <SiGithub/>&nbsp;{username}
+              </Text>
+              <Text
+                variant="body4"
+                styleSheet={{
+                  color: appConfig.theme.colors.neutrals[200],
+                  backgroundColor: appConfig.theme.colors.neutrals[900],
+                  padding: '3px 10px',
+                  borderRadius: '1000px', 
+                  margin: '5px 0'
+                }}
+              >
+                {location}
               </Text>
             </Box>
             {/* Photo Area */}
